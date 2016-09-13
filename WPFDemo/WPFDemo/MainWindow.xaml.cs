@@ -28,63 +28,64 @@ namespace WPFDemo {
         from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseMove")
         select ev.EventArgs.GetPosition(this);
 
-      // Step 1 - this shows the mouse position in the label
-      movePoints.ObserveOnDispatcher( ).Subscribe(
-        pos => label.Content = pos.ToString( ));
+            // Step 1 - this shows the mouse position in the label
+            //movePoints.ObserveOnDispatcher( ).Subscribe(
+            //  pos => label.Content = pos.ToString( ));
 
-      //var mouseDownPoints =
-      //  from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseLeftButtonDown")
-      //  select ev.EventArgs.GetPosition(this);
+            var mouseDownPoints =
+              from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseLeftButtonDown")
+              select ev.EventArgs.GetPosition(this);
 
-      //var mouseUpPoints =
-      //  from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseLeftButtonUp")
-      //  select ev.EventArgs.GetPosition(this);
+            var mouseUpPoints =
+              from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseLeftButtonUp")
+              select ev.EventArgs.GetPosition(this);
 
-      // Step 2 - reacts to the mouse down event and shows position until the 
-      // mouse button is released - unfortunately, this technique works only
-      // one time
+            // Step 2 - reacts to the mouse down event and shows position until the 
+            // mouse button is released - unfortunately, this technique works only
+            // one time
 
-      //var query =
-      //  from pos in movePoints.SkipUntil(mouseDownPoints).TakeUntil(mouseUpPoints)
-      //  select pos;
-      //query.ObserveOnDispatcher( ).Subscribe(
-      //  pos => label.Content = pos.ToString( ));
+            //var query =
+            //  from pos in movePoints.SkipUntil(mouseDownPoints).TakeUntil(mouseUpPoints)
+            //  select pos;
+            //query.ObserveOnDispatcher( ).Subscribe(
+            //  pos => label.Content = pos.ToString( ));
 
-      // Step 3 - using a more complicated query, the mechanism works more than once
-      //var query =
-      //  from startPos in mouseDownPoints
-      //  from pos in movePoints.StartWith(startPos).TakeUntil(mouseUpPoints)
-      //  select pos;
+            // Step 3 - using a more complicated query, the mechanism works more than once
+            //var query =
+            //  from startPos in mouseDownPoints
+            //  from pos in movePoints.StartWith(startPos).TakeUntil(mouseUpPoints)
+            //  select pos;
 
-      // Alternatively:
-      //var query_ =
-      //  mouseDownPoints.SelectMany(startPos =>
-      //    movePoints.StartWith(startPos).TakeUntil(mouseUpPoints));
+            // Alternatively:
+            //var query_ =
+            //  mouseDownPoints.SelectMany(startPos =>
+            //    movePoints.StartWith(startPos).TakeUntil(mouseUpPoints));
 
-      //query.ObserveOnDispatcher( ).Subscribe(
-      //  pos => label.Content = pos.ToString( ));
+            //query.ObserveOnDispatcher( ).Subscribe(
+            //  pos => label.Content = pos.ToString( ));
 
-      // Step 4 - a moveable UI label
+            // Step 4 - a moveable UI label
 
-      //label.Content = "move me";
+            label.Content = "move me";
 
-      //var mouseDown = mouseDownPoints.Where(sp =>
-      //  sp.X > label.Margin.Left &&
-      //  sp.X < label.Margin.Left + label.ActualWidth &&
-      //  sp.Y > label.Margin.Top &&
-      //  sp.Y < label.Margin.Top + label.ActualHeight);
+            var mouseDown = mouseDownPoints.Where(sp =>
+              sp.X > label.Margin.Left &&
+              sp.X < label.Margin.Left + label.ActualWidth &&
+              sp.Y > label.Margin.Top &&
+              sp.Y < label.Margin.Top + label.ActualHeight);
 
-      //var mouseMove = movePoints.Zip(movePoints.Skip(1), (prev, cur) => new { dx = cur.X - prev.X, dy = cur.Y - prev.Y });
+            var mouseMove = movePoints.Zip(movePoints.Skip(1), (prev, cur) => new { dx = cur.X - prev.X, dy = cur.Y - prev.Y });
 
-      //var deltas = from md in mouseDown
-      //             from mm in mouseMove.TakeUntil(mouseUpPoints)
-      //             select mm;
+            var deltas = from md in mouseDown
+                         from mm in mouseMove.TakeUntil(mouseUpPoints)
+                         select mm;
 
-      //deltas.ObserveOnDispatcher( ).Subscribe(
-      //  delta => {
-      //    label.Margin = new Thickness(label.Margin.Left + delta.dx, label.Margin.Top + delta.dy, 0, 0);
-      //  });
-    }
+            deltas.ObserveOnDispatcher().Subscribe(
+              delta =>
+              {
+                  label.Margin = new Thickness(label.Margin.Left + delta.dx, label.Margin.Top + delta.dy, 0, 0);
+              });
+        }
 
     private void button1_Click(object sender, RoutedEventArgs e) {
       var ob = Observable.Interval(TimeSpan.FromSeconds(0.1));
