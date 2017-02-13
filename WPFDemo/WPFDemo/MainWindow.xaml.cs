@@ -17,20 +17,20 @@ using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 
 namespace WPFDemo {
-  /// <summary>
-  /// Interaction logic for MainWindow.xaml
-  /// </summary>
-  public partial class MainWindow : Window {
-    public MainWindow() {
-      InitializeComponent();
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window {
+        public MainWindow() {
+            InitializeComponent();
 
-      var movePoints =
-        from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseMove")
-        select ev.EventArgs.GetPosition(this);
+            var movePoints =
+              from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseMove")
+              select ev.EventArgs.GetPosition(this);
 
             // Step 1 - this shows the mouse position in the label
-            //movePoints.ObserveOnDispatcher( ).Subscribe(
-            //  pos => label.Content = pos.ToString( ));
+            //movePoints.ObserveOnDispatcher().Subscribe(
+            //  pos => label.Content = pos.ToString());
 
             var mouseDownPoints =
               from ev in Observable.FromEventPattern<MouseEventArgs>(this, "MouseLeftButtonDown")
@@ -81,33 +81,35 @@ namespace WPFDemo {
                          select mm;
 
             deltas.ObserveOnDispatcher().Subscribe(
-              delta =>
-              {
+              delta => {
                   label.Margin = new Thickness(label.Margin.Left + delta.dx, label.Margin.Top + delta.dy, 0, 0);
               });
         }
 
-    private void button1_Click(object sender, RoutedEventArgs e) {
-      var ob = Observable.Interval(TimeSpan.FromSeconds(0.1));
+        private void button1_Click(object sender, RoutedEventArgs e) {
+            var ob = Observable.Interval(TimeSpan.FromSeconds(0.1));
 
-      // Step 1 - this doesn't work because we'll be updating the UI from the 
-      // wrong thread
+            // Subscribing to a sequence of values from an arbitrary source, outputting
+            // into the UI.
 
-      //ob.Subscribe(
-      //  v => output.Text += Environment.NewLine + String.Format(
-      //    "(Thread {0}) {1}", Thread.CurrentThread.ManagedThreadId, v));
+            // Step 1 - this doesn't work because we'll be updating the UI from the 
+            // wrong thread
 
-      // Step 2 - this works by passing in a particular sync context
+            //ob.Subscribe(
+            //  v => output.Text += Environment.NewLine + String.Format(
+            //    "(Thread {0}) {1}", Thread.CurrentThread.ManagedThreadId, v));
 
-      //ob.ObserveOn(SynchronizationContext.Current).Subscribe(
-      //  v => output.Text += Environment.NewLine + String.Format(
-      //    "(Thread {0}) {1}", Thread.CurrentThread.ManagedThreadId, v));
+            // Step 2 - this works by passing in a particular sync context
 
-      // Step 3 - finds the correct sync context automatically
+            //ob.ObserveOn(SynchronizationContext.Current).Subscribe(
+            //  v => output.Text += Environment.NewLine + String.Format(
+            //    "(Thread {0}) {1}", Thread.CurrentThread.ManagedThreadId, v));
 
-      //ob.ObserveOnDispatcher().Subscribe(
-      //  v => output.Text += Environment.NewLine + String.Format(
-      //    "(Thread {0}) {1}", Thread.CurrentThread.ManagedThreadId, v));
+            // Step 3 - finds the correct sync context automatically
+
+            //ob.ObserveOnDispatcher().Subscribe(
+            //  v => output.Text += Environment.NewLine + String.Format(
+            //    "(Thread {0}) {1}", Thread.CurrentThread.ManagedThreadId, v));
+        }
     }
-  }
 }
